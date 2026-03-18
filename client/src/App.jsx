@@ -23,6 +23,7 @@ function DashboardLayout() {
   const handleQuerySubmit = async (prompt) => {
     if (!currentDataset) return;
     setLoading(true);
+    try {
       // The backend route is /api/query, not /api/query/process
       const response = await fetch('http://localhost:5000/api/query', {
         method: 'POST',
@@ -33,9 +34,14 @@ function DashboardLayout() {
         body: JSON.stringify({ prompt, datasetId: currentDataset._id })
       });
 
+      if (!response.ok) {
+        throw new Error('Query failed');
+      }
+
       const data = await response.json();
       setQueries([data, ...queries]);
     } catch (err) {
+
       console.error("Query failed", err);
     } finally {
       setLoading(false);
