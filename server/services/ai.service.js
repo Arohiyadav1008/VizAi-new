@@ -3,7 +3,8 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 exports.parseQuery = async (prompt, columns) => {
   const apiKeys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(k => k);
   // Based on diagnostic listing, these are the confirmed available models for these keys
-  const modelsToTry = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-pro"];
+  const modelsToTry = ["gemini-1.5-flash-latest", "gemini-1.5-pro-latest", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro"];
+
 
 
   if (apiKeys.length === 0) {
@@ -77,7 +78,8 @@ exports.parseQuery = async (prompt, columns) => {
 
 exports.generateSuggestions = async (columns) => {
   const apiKeys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(k => k);
-  const modelsToTry = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-pro"];
+  const modelsToTry = ["gemini-1.5-flash-latest", "gemini-1.5-pro-latest", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro"];
+
 
 
   for (const apiKey of apiKeys) {
