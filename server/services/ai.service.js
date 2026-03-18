@@ -38,9 +38,11 @@ exports.parseQuery = async (prompt, columns) => {
             ],
             "dimensions": ["column_to_group_by"], // Empty [] for total/global summary
             "chartType": "bar" | "line" | "area" | "pie",
-            "title": "Professional Title",
+            "title": "A descriptive title for the chart",
             "insight": "Analytical insight."
           }
+          6. IMPORTANT: Avoid using numeric ID columns or indices (e.g. "User ID", "ID", "Unnamed: 0") as dimensions unless strictly necessary.
+          7. If the user asks for a comparison of counts (e.g. "number of males vs females"), the dimension should be the category ("Gender") and the metric should be a "count" operation.
         `;
 
 

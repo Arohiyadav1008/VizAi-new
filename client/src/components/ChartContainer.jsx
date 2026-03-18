@@ -37,7 +37,7 @@ const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
               itemStyle={{ color: '#f8f8f8' }}
               cursor={{ fill: '#27272a', opacity: 0.4 }}
             />
-            <Legend iconType="circle" />
+            {data.length <= 15 && <Legend iconType="circle" />}
             {metrics.map((m, i) => (
               <Bar key={getMetricKey(m)} dataKey={getMetricKey(m)} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />
             ))}
@@ -52,7 +52,7 @@ const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
             <Tooltip 
               contentStyle={{ backgroundColor: '#18191c', border: '1px solid #27272a', borderRadius: '12px' }}
             />
-            <Legend iconType="circle" />
+            {data.length <= 15 && <Legend iconType="circle" />}
             {metrics.map((m, i) => (
               <Line key={getMetricKey(m)} type="monotone" dataKey={getMetricKey(m)} stroke={COLORS[i % COLORS.length]} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
             ))}
@@ -75,7 +75,7 @@ const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
             <Tooltip 
               contentStyle={{ backgroundColor: '#18191c', border: '1px solid #27272a', borderRadius: '12px' }}
             />
-            <Legend iconType="circle" />
+            {data.length <= 15 && <Legend iconType="circle" />}
             {metrics.map((m, i) => (
               <Area key={getMetricKey(m)} type="monotone" dataKey={getMetricKey(m)} stroke={COLORS[i % COLORS.length]} fillOpacity={1} fill={`url(#${sanitizeId(`color${getMetricKey(m)}`)})`} strokeWidth={3} />
             ))}
@@ -104,9 +104,10 @@ const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
             <Tooltip 
               contentStyle={{ backgroundColor: '#18191c', border: '1px solid #27272a', borderRadius: '12px' }}
             />
-            <Legend verticalAlign="bottom" height={36}/>
+            {data.length <= 15 && <Legend verticalAlign="bottom" height={36}/>}
           </PieChart>
         );
+
       default:
         return <div className="flex items-center justify-center h-full text-muted-foreground italic">Unsupported chart type</div>;
     }
