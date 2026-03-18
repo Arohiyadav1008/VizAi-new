@@ -8,9 +8,16 @@ import { cn } from '../lib/utils';
 const COLORS = ['#3b82f6', '#06b6d4', '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#eab308'];
 
 const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
+  const [chartType, setChartType] = React.useState(type);
+
+  React.useEffect(() => {
+    setChartType(type);
+  }, [type]);
+
   const renderChart = () => {
-    switch (type) {
+    switch (chartType) {
       case 'bar':
+
         return (
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
