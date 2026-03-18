@@ -29,17 +29,20 @@ const UploadModal = ({ isOpen, onClose, onUploadSuccess }) => {
     formData.append('file', file);
 
     try {
-      // Proxy to backend (assuming localhost:5000)
-      const response = await fetch('http://localhost:5000/api/upload/csv', {
+      // The backend route is /api/upload, not /api/upload/csv
+      const response = await fetch('http://localhost:5000/api/upload', {
         method: 'POST',
         headers: {
-          // Add auth tokens if needed
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: formData
       });
 
-      if (!response.ok) throw new Error('Upload failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Upload failed');
+      }
+
 
       const data = await response.json();
       onUploadSuccess(data);

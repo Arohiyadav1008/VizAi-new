@@ -31,7 +31,8 @@ exports.uploadCSV = async (req, res, next) => {
         });
 
         const dataset = new Dataset({
-          userId: req.user?.id || null, // Make optional for initial testing
+          userId: req.user.id,
+
           name: req.file.originalname,
           columns,
           data: results
