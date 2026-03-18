@@ -3,7 +3,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 exports.parseQuery = async (prompt, columns, columnSamples = {}) => {
   const apiKeys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(k => k);
   // Based on diagnostic listing, these are the confirmed available models for these keys
-  const modelsToTry = ["gemini-2.0-flash", "gemini-flash-latest", "gemini-pro-latest", "gemini-2.5-flash", "gemini-1.5-flash"];
+  const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest", "gemini-pro-latest", "gemini-1.5-flash"];
   
   if (apiKeys.length === 0) {
     throw new Error("No Gemini API keys found in .env");
@@ -60,9 +60,14 @@ exports.parseQuery = async (prompt, columns, columnSamples = {}) => {
       } catch (err) {
         lastError = err;
         const msg = err.message || '';
-        const status = err.status || (msg.includes('404') ? 404 : msg.includes('400') ? 400 : 401 ? 401 : 500);
+        const status = err.status || (msg.includes('404') ? 404 : msg.includes('400') ? 400 : msg.includes('429') ? 429 : msg.includes('401') ? 401 : 500);
 
-        if (status === 404 || msg.includes('not found') || msg.includes('model')) {
+        if (status === 429) {
+          console.warn(`Key ${apiKey.substring(0, 8)}... rate limited (429), trying next key...`);
+          break; // Key-level failure, try next key
+        }
+
+        if (status === 404 || msg.toLowerCase().includes('not found')) {
           console.warn(`Model ${modelName} not found for key ${apiKey.substring(0, 8)}..., trying next model...`);
           continue;
         }
@@ -85,7 +90,7 @@ exports.parseQuery = async (prompt, columns, columnSamples = {}) => {
 
 exports.generateSuggestions = async (columns) => {
   const apiKeys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(k => k);
-  const modelsToTry = ["gemini-2.0-flash", "gemini-flash-latest", "gemini-pro-latest", "gemini-2.5-flash", "gemini-1.5-flash"];
+  const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest", "gemini-pro-latest", "gemini-1.5-flash"];
 
 
 
@@ -106,7 +111,15 @@ exports.generateSuggestions = async (columns) => {
         const jsonMatch = text.match(/\[[\s\S]*\]/);
         if (jsonMatch) return JSON.parse(jsonMatch[0]);
       } catch (err) {
-        console.warn(`Suggestion generation failed for ${modelName}, trying next...`);
+        lastError = err;
+        const msg = err.message || '';
+        const status = err.status || (msg.includes('404') ? 404 : msg.includes('400') ? 400 : msg.includes('429') ? 429 : msg.includes('401') ? 401 : 500);
+
+        if (status === 429) {
+          console.warn(`Suggestion generation: Key ${apiKey.substring(0, 8)}... rate limited (429), trying next key...`);
+          break; // Try next key
+        }
+        console.warn(`Suggestion generation failed for ${modelName} on key ${apiKey.substring(0, 8)}..., trying next...`);
       }
     }
   }
