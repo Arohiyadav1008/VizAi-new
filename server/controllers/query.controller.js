@@ -20,14 +20,38 @@ exports.processQuery = async (req, res, next) => {
 
     // Filter data
     let filteredData = dataset.data;
-    if (filters && Object.keys(filters).length > 0) {
+    if (filters && Array.isArray(filters) && filters.length > 0) {
       filteredData = filteredData.filter(row => {
-        return Object.entries(filters).every(([key, value]) => {
-          if (!row[key]) return false;
-          return String(row[key]).toLowerCase() === String(value).toLowerCase();
+        return filters.every(f => {
+          const rowVal = row[f.field];
+          if (rowVal === undefined || rowVal === null) return false;
+          
+          const val = parseFloat(String(f.value).replace(/[^0-9.-]+/g, ""));
+          const rowNum = parseFloat(String(rowVal).replace(/[^0-9.-]+/g, ""));
+          
+          const op = f.op || f.operator || '==';
+
+          if (!isNaN(val) && !isNaN(rowNum)) {
+            if (op === '>') return rowNum > val;
+            if (op === '<') return rowNum < val;
+            if (op === '>=') return rowNum >= val;
+            if (op === '<=') return rowNum <= val;
+            if (op === '==' || op === '=') return rowNum === val;
+            if (op === '!=') return rowNum !== val;
+          }
+
+          // Fallback to string comparison
+          const s1 = String(rowVal).toLowerCase();
+          const s2 = String(f.value).toLowerCase();
+          if (op === '==' || op === '=') return s1 === s2;
+          if (op === '!=') return s1 !== s2;
+          if (op === 'includes') return s1.includes(s2);
+          
+          return s1 === s2; // Default
         });
       });
     }
+
 
     if (intent === 'aggregation') {
       const grouped = {};

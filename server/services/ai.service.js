@@ -29,7 +29,7 @@ exports.parseQuery = async (prompt, columns) => {
           4. If the user asks for a total/overall count (no breakdown), leave "dimensions" as an empty array [].
           5. Output MUST be valid JSON:
           {
-            "intent": "aggregation" | "listing",
+            "filters": [{ "field": "Monthly Visits", "op": ">", "value": 20 }],
             "metrics": [
               { "field": "column_name", "op": "sum" | "avg" | "count" | "min" | "max", "label": "Friendly Name" }
             ],

@@ -86,6 +86,7 @@ const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
             />
             <Legend verticalAlign="bottom" height={36}/>
           </PieChart>
+
         );
       default:
         return <div className="flex items-center justify-center h-full text-muted-foreground italic">Unsupported chart type</div>;
@@ -93,8 +94,26 @@ const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {title && <h3 className="font-bold text-lg mb-6">{title}</h3>}
+    <div className="flex flex-col h-full group/chart">
+      <div className="flex items-center justify-between mb-4">
+        {title && <h3 className="font-bold text-sm text-muted-foreground truncate flex-1">{title}</h3>}
+        <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/50 ml-4 shrink-0 transition-opacity">
+          {['bar', 'line', 'area', 'pie'].map((t) => (
+            <button
+              key={t}
+              onClick={() => setChartType(t)}
+              className={cn(
+                "px-2 py-1 text-[9px] font-black uppercase rounded-md transition-all",
+                chartType === t
+                  ? "bg-accent text-accent-foreground shadow-sm shadow-accent/20"
+                  : "hover:bg-accent/10 text-muted-foreground hover:text-accent"
+              )}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="flex-1 min-h-0 w-full">
         <ResponsiveContainer width="100%" height="100%">
           {renderChart()}
