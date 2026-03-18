@@ -5,7 +5,32 @@ import { useAuth } from '../context/AuthContext';
 
 const Sidebar = ({ datasets = [], currentDataset, onDatasetSelect, onDatasetDelete, onUploadClick, queries, onQuerySubmit, loading }) => {
   const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const { user, logout } = useAuth();
+
+  const fetchSuggestions = async (id) => {
+    setSuggestionsLoading(true);
+    try {
+      const response = await fetch(`http://localhost:5000/api/query/suggestions/${id}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await response.json();
+      if (response.ok) setSuggestions(data);
+    } catch (err) {
+      console.error("Failed to fetch suggestions", err);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (currentDataset?._id) {
+      fetchSuggestions(currentDataset._id);
+    } else {
+      setSuggestions([]);
+    }
+  }, [currentDataset?._id]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -40,7 +65,7 @@ const Sidebar = ({ datasets = [], currentDataset, onDatasetSelect, onDatasetDele
             <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">Upload CSV</span>
           </button>
           
-          <div className="space-y-2 mt-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+          <div className="space-y-2 mt-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
             {datasets.map((d) => (
               <div 
                 key={d._id}
@@ -77,8 +102,30 @@ const Sidebar = ({ datasets = [], currentDataset, onDatasetSelect, onDatasetDele
           </div>
         </div>
 
+        {/* AI Suggestions */}
+        {currentDataset && (
+          <div className="space-y-3 animate-in fade-in slide-in-from-left-4 duration-500">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 flex items-center justify-between">
+              Try asking...
+              {suggestionsLoading && <div className="w-2 h-2 rounded-full bg-accent animate-ping" />}
+            </h3>
+            <div className="flex flex-wrap gap-2 px-1">
+              {suggestions.map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => onQuerySubmit(s)}
+                  className="text-[10px] text-left p-2 rounded-lg bg-accent/5 border border-accent/10 hover:bg-accent/10 hover:border-accent/30 transition-all text-muted-foreground hover:text-accent font-medium leading-tight"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Chat Interface */}
         <div className="flex flex-col border border-border rounded-2xl bg-muted/20 overflow-hidden shadow-inner">
+
           <div className="bg-muted/40 p-2 text-[10px] font-bold text-center border-b border-border text-muted-foreground uppercase tracking-widest">
             AI Data Assistant
           </div>

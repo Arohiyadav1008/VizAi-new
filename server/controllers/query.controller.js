@@ -135,3 +135,16 @@ exports.getQueries = async (req, res, next) => {
   }
 };
 
+exports.getSuggestions = async (req, res, next) => {
+  try {
+    const dataset = await Dataset.findById(req.params.datasetId);
+    if (!dataset) return res.status(404).json({ message: 'Dataset not found' });
+
+    const suggestions = await aiService.generateSuggestions(dataset.columns);
+    res.json(suggestions);
+  } catch (err) {
+    next(err);
+  }
+};
+
+

@@ -6,4 +6,7 @@ const authMiddleware = require('../middlewares/auth.middleware');
 router.post('/', authMiddleware, queryController.processQuery);
 router.get('/', authMiddleware, queryController.getQueries);
 
+router.get('/suggestions/:datasetId', authMiddleware, queryController.getSuggestions);
+
 module.exports = router;
+

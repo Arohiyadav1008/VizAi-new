@@ -72,3 +72,31 @@ exports.parseQuery = async (prompt, columns) => {
   console.error("All AI Service keys/models failed:", lastError);
   throw new Error("AI Assistant unavailable: All provided API keys or models failed. Please check your Gemini API configuration.");
 };
+
+exports.generateSuggestions = async (columns) => {
+  const apiKeys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(k => k);
+  const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash"];
+
+  for (const apiKey of apiKeys) {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    for (const modelName of modelsToTry) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const prompt = `
+          Analyze these data columns: ${JSON.stringify(columns)}
+          Suggest 4 professional and interesting business questions a non-technical user might ask to get insights from this data.
+          Format your response as a valid JSON array of strings.
+          Example: ["What is the total sales by region?", "Show me the top 5 products by profit"]
+        `;
+        const result = await model.generateContent(prompt);
+        const text = result.response.text();
+        const jsonMatch = text.match(/\[[\s\S]*\]/);
+        if (jsonMatch) return JSON.parse(jsonMatch[0]);
+      } catch (err) {
+        console.warn(`Suggestion generation failed for ${modelName}, trying next...`);
+      }
+    }
+  }
+  return ["How many rows are in this dataset?", "Show me a summary of the data"];
+};
+
