@@ -77,4 +77,3 @@ VizAI is a modern, intelligent business intelligence platform that allows anyone
 - `sample_sales_data.csv`: A sample dataset to get you started.
 
 
-##Awanish Verma
