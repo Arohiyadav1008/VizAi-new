@@ -9,7 +9,9 @@ import Dashboard from './components/Dashboard';
 import LandingPage from './components/LandingPage';
 import UploadModal from './components/UploadModal';
 import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
+
 
 // The main authenticated layout containing sidebar and dashboard
 function DashboardLayout() {
