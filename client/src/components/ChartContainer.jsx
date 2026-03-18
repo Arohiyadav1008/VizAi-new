@@ -15,59 +15,63 @@ const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
   }, [type]);
 
   const renderChart = () => {
+    // Helper to get data key from metric (handles both object {label, field} and string)
+    const getMetricKey = (m) => typeof m === 'object' ? m.label : m;
+    const sanitizeId = (s) => String(s).replace(/[^a-zA-Z0-9]/g, '-');
+
     switch (chartType) {
       case 'bar':
-
         return (
-          <BarChart data={data}>
+          <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
-            <XAxis dataKey="label" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
+            <XAxis dataKey="label" stroke="#a1a1aa" fontSize={11} tickLine={false} axisLine={false} />
+            <YAxis stroke="#a1a1aa" fontSize={11} tickLine={false} axisLine={false} />
             <Tooltip 
               contentStyle={{ backgroundColor: '#18191c', border: '1px solid #27272a', borderRadius: '12px' }}
               itemStyle={{ color: '#f8f8f8' }}
+              cursor={{ fill: '#27272a', opacity: 0.4 }}
             />
             <Legend iconType="circle" />
             {metrics.map((m, i) => (
-              <Bar key={m} dataKey={m} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />
+              <Bar key={getMetricKey(m)} dataKey={getMetricKey(m)} fill={COLORS[i % COLORS.length]} radius={[4, 4, 0, 0]} />
             ))}
           </BarChart>
         );
       case 'line':
         return (
-          <LineChart data={data}>
+          <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
-            <XAxis dataKey="label" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
+            <XAxis dataKey="label" stroke="#a1a1aa" fontSize={11} tickLine={false} axisLine={false} />
+            <YAxis stroke="#a1a1aa" fontSize={11} tickLine={false} axisLine={false} />
             <Tooltip 
               contentStyle={{ backgroundColor: '#18191c', border: '1px solid #27272a', borderRadius: '12px' }}
             />
             <Legend iconType="circle" />
             {metrics.map((m, i) => (
-              <Line key={m} type="monotone" dataKey={m} stroke={COLORS[i % COLORS.length]} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+              <Line key={getMetricKey(m)} type="monotone" dataKey={getMetricKey(m)} stroke={COLORS[i % COLORS.length]} strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
             ))}
           </LineChart>
         );
       case 'area':
         return (
-          <AreaChart data={data}>
+          <AreaChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <defs>
               {metrics.map((m, i) => (
-                <linearGradient key={`grad-${m}`} id={`color${m}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS[i % COLORS.length]} stopOpacity={0.3}/>
+                <linearGradient key={`grad-${getMetricKey(m)}`} id={sanitizeId(`color${getMetricKey(m)}`)} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={COLORS[i % COLORS.length]} stopOpacity={0.6}/>
                   <stop offset="95%" stopColor={COLORS[i % COLORS.length]} stopOpacity={0}/>
                 </linearGradient>
               ))}
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
-            <XAxis dataKey="label" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
+            <XAxis dataKey="label" stroke="#a1a1aa" fontSize={11} tickLine={false} axisLine={false} />
+            <YAxis stroke="#a1a1aa" fontSize={11} tickLine={false} axisLine={false} />
             <Tooltip 
               contentStyle={{ backgroundColor: '#18191c', border: '1px solid #27272a', borderRadius: '12px' }}
             />
             <Legend iconType="circle" />
             {metrics.map((m, i) => (
-              <Area key={m} type="monotone" dataKey={m} stroke={COLORS[i % COLORS.length]} fillOpacity={1} fill={`url(#color${m})`} strokeWidth={2} />
+              <Area key={getMetricKey(m)} type="monotone" dataKey={getMetricKey(m)} stroke={COLORS[i % COLORS.length]} fillOpacity={1} fill={`url(#${sanitizeId(`color${getMetricKey(m)}`)})`} strokeWidth={3} />
             ))}
           </AreaChart>
         );
@@ -78,11 +82,14 @@ const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={60}
-              outerRadius={100}
+              innerRadius={80}
+              outerRadius={120}
               paddingAngle={5}
-              dataKey={metrics[0]}
+              dataKey={getMetricKey(metrics[0])}
               nameKey="label"
+              stroke="none"
+              animationBegin={0}
+              animationDuration={1500}
             >
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -93,12 +100,13 @@ const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
             />
             <Legend verticalAlign="bottom" height={36}/>
           </PieChart>
-
         );
       default:
         return <div className="flex items-center justify-center h-full text-muted-foreground italic">Unsupported chart type</div>;
     }
   };
+
+
 
   return (
     <div className="flex flex-col h-full group/chart">
