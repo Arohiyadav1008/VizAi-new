@@ -10,14 +10,20 @@ const COLORS = ['#3b82f6', '#06b6d4', '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e'
 const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
   const [chartType, setChartType] = React.useState(type);
 
+
+
   React.useEffect(() => {
     setChartType(type);
   }, [type]);
 
   const renderChart = () => {
     // Helper to get data key from metric (handles both object {label, field} and string)
-    const getMetricKey = (m) => typeof m === 'object' ? m.label : m;
+    const getMetricKey = (m) => {
+      if (typeof m === 'object') return m.label || m.field;
+      return m || 'Count';
+    };
     const sanitizeId = (s) => String(s).replace(/[^a-zA-Z0-9]/g, '-');
+
 
     switch (chartType) {
       case 'bar':
