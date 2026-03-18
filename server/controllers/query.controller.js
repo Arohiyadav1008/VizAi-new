@@ -111,6 +111,8 @@ exports.processQuery = async (req, res, next) => {
 
       // Update metrics array for frontend
       parsed.metrics = actualMetrics;
+      parsed.isGlobal = isGlobal;
+
 
       // Prepare chartData
       chartData = Object.values(grouped);

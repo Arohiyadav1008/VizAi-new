@@ -7,8 +7,10 @@ import { cn } from '../lib/utils';
 
 const COLORS = ['#3b82f6', '#06b6d4', '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#eab308'];
 
-const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
+const ChartContainer = ({ type, data, title, metrics = [], dimensions = [] }) => {
   const [chartType, setChartType] = React.useState(type);
+  const isGlobal = data?.length === 1 && data[0].label === 'Total';
+
 
 
 
@@ -28,10 +30,11 @@ const ChartContainer = ({ type, data, title, metrics, dimensions }) => {
     switch (chartType) {
       case 'bar':
         return (
-          <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }} barSize={isGlobal ? 80 : undefined}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
-            <XAxis dataKey="label" stroke="#a1a1aa" fontSize={11} tickLine={false} axisLine={false} />
+            <XAxis dataKey="label" stroke="#a1a1aa" fontSize={11} tickLine={false} axisLine={false} hide={isGlobal} />
             <YAxis stroke="#a1a1aa" fontSize={11} tickLine={false} axisLine={false} />
+
             <Tooltip 
               contentStyle={{ backgroundColor: '#18191c', border: '1px solid #27272a', borderRadius: '12px' }}
               itemStyle={{ color: '#f8f8f8' }}
