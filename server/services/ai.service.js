@@ -2,7 +2,8 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 exports.parseQuery = async (prompt, columns) => {
   const apiKeys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(k => k);
-  const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
+  // Based on diagnostic listing, these are the confirmed available models for these keys
+  const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-pro"];
 
   if (apiKeys.length === 0) {
     throw new Error("No Gemini API keys found in .env");
@@ -47,19 +48,20 @@ exports.parseQuery = async (prompt, columns) => {
       } catch (err) {
         lastError = err;
         const msg = err.message || '';
-        const status = err.status || (msg.includes('404') ? 404 : msg.includes('400') ? 400 : 500);
+        const status = err.status || (msg.includes('404') ? 404 : msg.includes('400') ? 400 : 401 ? 401 : 500);
 
         if (status === 404 || msg.includes('not found')) {
           console.warn(`Model ${modelName} not found for key ${apiKey.substring(0, 8)}..., trying next model...`);
           continue;
         }
         
-        if (status === 400 || status === 401 || msg.includes('API_KEY_INVALID')) {
+        if (status === 400 || status === 401 || msg.includes('API_KEY_INVALID') || msg.includes('invalid')) {
           console.warn(`API Key ${apiKey.substring(0, 8)}... failed, trying next key...`);
           break; // Break model loop to try next key
         }
         
-        throw err; // For other errors, rethrow to be caught by the outer safety or controller
+        console.error(`Error with ${modelName} on key ${apiKey.substring(0, 8)}...:`, msg);
+        continue; // Try next model or key
       }
     }
   }
