@@ -58,7 +58,7 @@ exports.processQuery = async (req, res, next) => {
 
     // 3. Save Query (Optional: req.user.id might be undefined if no auth)
     const query = new Query({
-      userId: req.user?.id || null, 
+      userId: req.user.id,
       datasetId,
       prompt,
       response: {
