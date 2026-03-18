@@ -9,7 +9,7 @@ import Dashboard from './components/Dashboard';
 import LandingPage from './components/LandingPage';
 import UploadModal from './components/UploadModal';
 import Login from './pages/Login';
-import Signup from './pages/Signup';
+import Navbar from './components/Navbar';
 
 // The main authenticated layout containing sidebar and dashboard
 function DashboardLayout() {
@@ -40,22 +40,26 @@ function DashboardLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      <Sidebar 
-        currentDataset={currentDataset} 
-        onDatasetSelect={setCurrentDataset} 
-        onUploadClick={() => setIsUploadModalOpen(true)}
-        queries={queries}
-        onQuerySubmit={handleQuerySubmit}
-        loading={loading}
-      />
-      <main className="flex-1 overflow-y-auto custom-scrollbar p-6">
-        <Dashboard 
-          dataset={currentDataset} 
-          queries={queries} 
+    <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+      <Navbar />
+      <div className="flex flex-1 pt-20 overflow-hidden">
+        <Sidebar 
+          currentDataset={currentDataset} 
+          onDatasetSelect={setCurrentDataset} 
+          onUploadClick={() => setIsUploadModalOpen(true)}
+          queries={queries}
+          onQuerySubmit={handleQuerySubmit}
           loading={loading}
         />
-      </main>
+        <main className="flex-1 overflow-y-auto custom-scrollbar p-6">
+          <Dashboard 
+            dataset={currentDataset} 
+            queries={queries} 
+            loading={loading}
+          />
+        </main>
+      </div>
+
 
       <UploadModal 
         isOpen={isUploadModalOpen} 
