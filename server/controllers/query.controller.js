@@ -29,41 +29,72 @@ exports.processQuery = async (req, res, next) => {
       });
     }
 
-    if (intent === 'aggregation' && dimensions && dimensions.length > 0) {
+    if (intent === 'aggregation') {
       const grouped = {};
+      const actualMetrics = metrics.map(m => m.label || m.field);
       
-      // If the AI didn't provide any numeric metrics but wants an aggregation, 
-      // it's likely a count query. We'll add 'Count' to metrics.
-      const actualMetrics = [...metrics];
+      // Default to "Count" if no metrics provided
       if (actualMetrics.length === 0) {
         actualMetrics.push('Count');
       }
 
+      const isGlobal = !dimensions || dimensions.length === 0;
+
       filteredData.forEach(row => {
-        const key = dimensions.map(d => row[d] || 'Unknown').join(' - ');
+        const key = isGlobal ? 'Total' : dimensions.map(d => row[d] || 'Unknown').join(' - ');
+        
         if (!grouped[key]) {
           grouped[key] = { label: key };
           actualMetrics.forEach(m => grouped[key][m] = 0);
-        }
-        
-        // Always increment the 'Count' if it exists in our metrics
-        if (grouped[key].hasOwnProperty('Count')) {
-          grouped[key]['Count']++;
+          // For averages, we need to track counts
+          grouped[key]._counts = {};
+          actualMetrics.forEach(m => grouped[key]._counts[m] = 0);
         }
 
-        // Add up other metrics if they exist
+        metrics.forEach((m, idx) => {
+          const metricLabel = m.label || m.field;
+          const val = parseFloat(String(row[m.field]).replace(/[^0-9.-]+/g, ""));
+          
+          if (m.op === 'count') {
+            grouped[key][metricLabel]++;
+          } else if (!isNaN(val)) {
+            if (m.op === 'sum' || m.op === 'avg') {
+              grouped[key][metricLabel] += val;
+            } else if (m.op === 'min') {
+              grouped[key][metricLabel] = Math.min(grouped[key][metricLabel], val);
+            } else if (m.op === 'max') {
+              grouped[key][metricLabel] = Math.max(grouped[key][metricLabel], val);
+            }
+            grouped[key]._counts[metricLabel]++;
+          }
+        });
+
+        // Special case: if the AI just gave an empty metrics array, it wants a row count
+        if (metrics.length === 0) {
+          grouped[key]['Count']++;
+        }
+      });
+
+      // Finalize averages
+      Object.values(grouped).forEach(group => {
         metrics.forEach(m => {
-          const val = parseFloat(String(row[m]).replace(/[^0-9.-]+/g, ""));
-          if (!isNaN(val)) grouped[key][m] += val;
+          const metricLabel = m.label || m.field;
+          if (m.op === 'avg' && group._counts[metricLabel] > 0) {
+            group[metricLabel] = group[metricLabel] / group._counts[metricLabel];
+          }
         });
       });
 
-      // Update metrics array in parsed object so frontend knows what to render
+      // Update metrics array for frontend
       parsed.metrics = actualMetrics;
 
-      // Sort by the primary metric
-      const primaryMetric = actualMetrics[0];
-      chartData = Object.values(grouped).sort((a, b) => b[primaryMetric] - a[primaryMetric]);
+      // Prepare chartData
+      chartData = Object.values(grouped);
+      
+      // Sort if not global
+      if (!isGlobal && actualMetrics.length > 0) {
+        chartData.sort((a, b) => b[actualMetrics[0]] - a[actualMetrics[0]]);
+      }
 
     } else {
       chartData = filteredData.slice(0, 100).map(row => ({
@@ -71,6 +102,7 @@ exports.processQuery = async (req, res, next) => {
         label: row[dimensions?.[0]] || 'Item'
       }));
     }
+
 
     // 3. Save Query (Optional: req.user.id might be undefined if no auth)
     const query = new Query({

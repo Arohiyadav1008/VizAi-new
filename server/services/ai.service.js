@@ -24,20 +24,22 @@ exports.parseQuery = async (prompt, columns) => {
 
           Rules:
           1. Use ONLY the columns provided.
-          2. Detect if the user wants an aggregation (sum, count, average, min, max) or a trend/distribution.
+          2. Detect if the user wants an aggregation (sum, count, average, min, max).
           3. Recommend the best chart type: "bar", "line", "area", "pie", or "scatter".
-          4. Output MUST be valid JSON:
+          4. If the user asks for a total/overall count (no breakdown), leave "dimensions" as an empty array [].
+          5. Output MUST be valid JSON:
           {
             "intent": "aggregation" | "listing",
-            "metrics": ["col1"], // Use [] if the user just wants to COUNT rows/categories
-            "dimensions": ["col2"],
-            "chartType": "bar",
-            "title": "Title String",
-            "filters": { "col": "value" },
-            "insight": "A brief analytical insight."
+            "metrics": [
+              { "field": "column_name", "op": "sum" | "avg" | "count" | "min" | "max", "label": "Friendly Name" }
+            ],
+            "dimensions": ["column_to_group_by"], // Empty [] for total/global summary
+            "chartType": "bar" | "line" | "area" | "pie",
+            "title": "Professional Title",
+            "insight": "Analytical insight."
           }
-          Note: For "how many X" or "count" queries, leave metrics empty - the system will handle it.
         `;
+
 
         const result = await model.generateContent([systemPrompt, prompt]);
         const responseText = result.response.text();
