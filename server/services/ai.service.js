@@ -1,12 +1,26 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const getAIModel = (apiKey) => {
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  return genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+};
 
 exports.parseQuery = async (prompt, columns) => {
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const apiKeys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(k => k);
+  
+  if (apiKeys.length === 0) {
+    throw new Error("No Gemini API keys found in .env");
+  }
 
-    const systemPrompt = `
+  let lastError = null;
+  
+  for (const apiKey of apiKeys) {
+    try {
+      const model = getAIModel(apiKey);
+
+      const systemPrompt = `
+
       You are an expert Data Scientist and BI Architect. Your task is to convert a user's natural language question into a structured JSON query object for a business dashboard.
       The data has the following columns:
       ${JSON.stringify(columns)}
@@ -36,16 +50,26 @@ exports.parseQuery = async (prompt, columns) => {
       }
     `;
 
-    const result = await model.generateContent([systemPrompt, prompt]);
-    const responseText = result.response.text();
-    
-    // Extract JSON from response (handling potential markdown blocks)
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("Could not parse AI response as JSON");
-    
-    return JSON.parse(jsonMatch[0]);
-  } catch (err) {
-    console.error("AI Service Error:", err);
-    throw err;
+      const result = await model.generateContent([systemPrompt, prompt]);
+      const responseText = result.response.text();
+      
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("Could not parse AI response as JSON");
+      
+      return JSON.parse(jsonMatch[0]);
+    } catch (err) {
+      lastError = err;
+      // If it's an API key error, continue to next key
+      if (err.message?.includes('API_KEY_INVALID') || err.status === 400 || err.status === 401) {
+        console.warn(`API Key ${apiKey.substring(0, 8)}... failed, trying next...`);
+        continue;
+      }
+      // If it's another type of error, throw it immediately
+      throw err;
+    }
   }
+
+  console.error("All AI Service keys failed:", lastError);
+  throw new Error("All provided Gemini API keys are invalid or failed. Please check your .env file.");
 };
+
