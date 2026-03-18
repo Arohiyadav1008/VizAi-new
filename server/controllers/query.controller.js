@@ -31,24 +31,40 @@ exports.processQuery = async (req, res, next) => {
 
     if (intent === 'aggregation' && dimensions && dimensions.length > 0) {
       const grouped = {};
+      
+      // If the AI didn't provide any numeric metrics but wants an aggregation, 
+      // it's likely a count query. We'll add 'Count' to metrics.
+      const actualMetrics = [...metrics];
+      if (actualMetrics.length === 0) {
+        actualMetrics.push('Count');
+      }
+
       filteredData.forEach(row => {
         const key = dimensions.map(d => row[d] || 'Unknown').join(' - ');
         if (!grouped[key]) {
           grouped[key] = { label: key };
-          metrics.forEach(m => grouped[key][m] = 0);
-          grouped[key]._count = 0;
+          actualMetrics.forEach(m => grouped[key][m] = 0);
         }
         
-        grouped[key]._count++;
+        // Always increment the 'Count' if it exists in our metrics
+        if (grouped[key].hasOwnProperty('Count')) {
+          grouped[key]['Count']++;
+        }
+
+        // Add up other metrics if they exist
         metrics.forEach(m => {
           const val = parseFloat(String(row[m]).replace(/[^0-9.-]+/g, ""));
           if (!isNaN(val)) grouped[key][m] += val;
         });
       });
 
-      // Average if needed (simple heuristic: if user asks for average, we'd need AI to tell us the operation)
-      // For now, we'll stick to Sum but we could extend this.
-      chartData = Object.values(grouped).sort((a, b) => b[metrics[0]] - a[metrics[0]]);
+      // Update metrics array in parsed object so frontend knows what to render
+      parsed.metrics = actualMetrics;
+
+      // Sort by the primary metric
+      const primaryMetric = actualMetrics[0];
+      chartData = Object.values(grouped).sort((a, b) => b[primaryMetric] - a[primaryMetric]);
+
     } else {
       chartData = filteredData.slice(0, 100).map(row => ({
         ...row,

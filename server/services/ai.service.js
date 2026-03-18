@@ -29,13 +29,14 @@ exports.parseQuery = async (prompt, columns) => {
           4. Output MUST be valid JSON:
           {
             "intent": "aggregation" | "listing",
-            "metrics": ["col1"],
+            "metrics": ["col1"], // Use [] if the user just wants to COUNT rows/categories
             "dimensions": ["col2"],
             "chartType": "bar",
             "title": "Title String",
             "filters": { "col": "value" },
             "insight": "A brief analytical insight."
           }
+          Note: For "how many X" or "count" queries, leave metrics empty - the system will handle it.
         `;
 
         const result = await model.generateContent([systemPrompt, prompt]);
