@@ -18,15 +18,38 @@ import { toast } from 'react-hot-toast';
 // The main authenticated layout containing sidebar and dashboard
 function DashboardLayout() {
   const [currentDataset, setCurrentDataset] = useState(null);
+  const [datasets, setDatasets] = useState([]);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [queries, setQueries] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // Fetch all datasets for the sidebar
+  const fetchDatasets = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/upload', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setDatasets(data);
+        // Auto-select first dataset if none selected
+        if (!currentDataset && data.length > 0) {
+          setCurrentDataset(data[0]);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch datasets", err);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchDatasets();
+  }, []);
 
   const handleQuerySubmit = async (prompt) => {
     if (!currentDataset) return;
     setLoading(true);
     try {
-      // The backend route is /api/query, not /api/query/process
       const response = await fetch('http://localhost:5000/api/query', {
         method: 'POST',
         headers: {
@@ -37,28 +60,43 @@ function DashboardLayout() {
       });
 
       const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Query failed');
-      }
-
+      if (!response.ok) throw new Error(data.message || 'Query failed');
       setQueries([data, ...queries]);
     } catch (err) {
-      console.error("Query failed", err);
       toast.error(err.message || 'Failed to process query');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleDeleteDataset = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/upload/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      if (response.ok) {
+        toast.success("Dataset deleted");
+        setDatasets(datasets.filter(d => d._id !== id));
+        if (currentDataset?._id === id) {
+          setCurrentDataset(null);
+          setQueries([]);
+        }
+      }
+    } catch (err) {
+      toast.error("Failed to delete dataset");
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
       <Navbar />
       <div className="flex flex-1 pt-20 overflow-hidden">
         <Sidebar 
+          datasets={datasets}
           currentDataset={currentDataset} 
           onDatasetSelect={setCurrentDataset} 
+          onDatasetDelete={handleDeleteDataset}
           onUploadClick={() => setIsUploadModalOpen(true)}
           queries={queries}
           onQuerySubmit={handleQuerySubmit}
@@ -73,18 +111,19 @@ function DashboardLayout() {
         </main>
       </div>
 
-
       <UploadModal 
         isOpen={isUploadModalOpen} 
         onClose={() => setIsUploadModalOpen(false)}
         onUploadSuccess={(dataset) => {
+          setDatasets([...datasets, dataset]);
           setCurrentDataset(dataset);
-          setQueries([]); // Reset queries for new dataset
+          setQueries([]);
         }}
       />
     </div>
   );
 }
+
 
 function App() {
   return (

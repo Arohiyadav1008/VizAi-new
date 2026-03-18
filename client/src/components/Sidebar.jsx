@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { MessageSquare, History, Upload, Plus, Send, FileText, ChevronRight, LogOut } from 'lucide-react';
+import { MessageSquare, History, Upload, Plus, Send, FileText, ChevronRight, LogOut, Trash2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 
-const Sidebar = ({ currentDataset, onDatasetSelect, onUploadClick, queries, onQuerySubmit, loading }) => {
+const Sidebar = ({ datasets = [], currentDataset, onDatasetSelect, onDatasetDelete, onUploadClick, queries, onQuerySubmit, loading }) => {
   const [query, setQuery] = useState('');
   const { user, logout } = useAuth();
 
@@ -34,21 +34,47 @@ const Sidebar = ({ currentDataset, onDatasetSelect, onUploadClick, queries, onQu
           </h3>
           <button 
             onClick={onUploadClick}
-            className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-dashed border-border hover:border-accent/40 hover:bg-accent/5 transition-all group mb-2"
+            className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-dashed border-border hover:border-accent/40 hover:bg-accent/5 transition-all group mb-4"
           >
             <Upload className="w-5 h-5 text-muted-foreground group-hover:text-accent" />
             <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">Upload CSV</span>
           </button>
           
-          {currentDataset && (
-            <div className="p-3 rounded-lg bg-accent/10 border border-accent/20 flex items-center gap-3 animate-in fade-in zoom-in duration-300">
-              <FileText className="w-5 h-5 text-accent" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{currentDataset.name}</p>
-                <p className="text-xs text-muted-foreground tracking-tight">{currentDataset.columns.length} columns detected</p>
+          <div className="space-y-2 mt-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+            {datasets.map((d) => (
+              <div 
+                key={d._id}
+                className={cn(
+                  "group relative p-3 rounded-xl border transition-all cursor-pointer flex items-center gap-3",
+                  currentDataset?._id === d._id 
+                    ? "bg-accent/10 border-accent/40 shadow-sm" 
+                    : "bg-muted/10 border-transparent hover:bg-muted/20 hover:border-border"
+                )}
+                onClick={() => onDatasetSelect(d)}
+              >
+                <div className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+                  currentDataset?._id === d._id ? "bg-accent/20" : "bg-muted"
+                )}>
+                  <FileText className={cn("w-4 h-4", currentDataset?._id === d._id ? "text-accent" : "text-muted-foreground")} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold truncate">{d.name}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{d.columns?.length || 0} columns</p>
+                </div>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDatasetDelete(d._id);
+                  }}
+                  className="p-1.5 opacity-0 group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-500 rounded-md transition-all text-muted-foreground"
+                  title="Delete dataset"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
         {/* Chat Interface */}

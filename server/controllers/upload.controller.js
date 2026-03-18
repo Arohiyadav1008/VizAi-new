@@ -58,3 +58,19 @@ exports.getDatasets = async (req, res, next) => {
     next(err);
   }
 };
+exports.deleteDataset = async (req, res, next) => {
+  try {
+    const dataset = await Dataset.findOneAndDelete({ 
+      _id: req.params.id, 
+      userId: req.user.id 
+    });
+
+    if (!dataset) {
+      return res.status(404).json({ message: 'Dataset not found or unauthorized' });
+    }
+
+    res.json({ message: 'Dataset deleted successfully' });
+  } catch (err) {
+    next(err);
+  }
+};
