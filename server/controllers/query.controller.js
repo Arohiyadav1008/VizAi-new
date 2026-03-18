@@ -124,9 +124,14 @@ exports.processQuery = async (req, res, next) => {
 
 exports.getQueries = async (req, res, next) => {
   try {
-    const queries = await Query.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const { datasetId } = req.query;
+    const filter = { userId: req.user.id };
+    if (datasetId) filter.datasetId = datasetId;
+
+    const queries = await Query.find(filter).sort({ createdAt: -1 });
     res.json(queries);
   } catch (err) {
     next(err);
   }
 };
+

@@ -23,7 +23,6 @@ function DashboardLayout() {
   const [queries, setQueries] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch all datasets for the sidebar
   const fetchDatasets = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/upload', {
@@ -42,9 +41,32 @@ function DashboardLayout() {
     }
   };
 
+  const fetchQueries = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/query?datasetId=${id}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setQueries(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch queries", err);
+    }
+  };
+
   React.useEffect(() => {
     fetchDatasets();
   }, []);
+
+  React.useEffect(() => {
+    if (currentDataset?._id) {
+      fetchQueries(currentDataset._id);
+    } else {
+      setQueries([]);
+    }
+  }, [currentDataset?._id]);
+
 
   const handleQuerySubmit = async (prompt) => {
     if (!currentDataset) return;
