@@ -54,21 +54,22 @@ exports.parseQuery = async (prompt, columns) => {
         const msg = err.message || '';
         const status = err.status || (msg.includes('404') ? 404 : msg.includes('400') ? 400 : 401 ? 401 : 500);
 
-        if (status === 404 || msg.includes('not found')) {
+        if (status === 404 || msg.includes('not found') || msg.includes('model')) {
           console.warn(`Model ${modelName} not found for key ${apiKey.substring(0, 8)}..., trying next model...`);
           continue;
         }
         
-        if (status === 400 || status === 401 || msg.includes('API_KEY_INVALID') || msg.includes('invalid')) {
-          console.warn(`API Key ${apiKey.substring(0, 8)}... failed, trying next key...`);
-          break; // Break model loop to try next key
+        if (status === 400 || status === 401 || msg.includes('API_KEY_INVALID') || msg.includes('invalid') || msg.includes('permission')) {
+          console.warn(`Key ${apiKey.substring(0, 8)}... failed (${msg}), trying next key...`);
+          break; // Key-level failure, try next key
         }
         
-        console.error(`Error with ${modelName} on key ${apiKey.substring(0, 8)}...:`, msg);
+        console.error(`Unexpected error with ${modelName} on key ${apiKey.substring(0, 8)}...:`, msg);
         continue; // Try next model or key
       }
     }
   }
+
 
   console.error("All AI Service keys/models failed:", lastError);
   throw new Error("AI Assistant unavailable: All provided API keys or models failed. Please check your Gemini API configuration.");
