@@ -6,7 +6,8 @@ const querySchema = new mongoose.Schema({
   prompt: { type: String, required: true },
   response: {
     intent: String,
-    metrics: [String],
+    metrics: [mongoose.Schema.Types.Mixed],
+
     dimensions: [String],
     filters: mongoose.Schema.Types.Mixed,
     chartType: String,
