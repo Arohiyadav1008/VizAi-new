@@ -13,6 +13,8 @@ import Signup from './pages/Signup';
 import Navbar from './components/Navbar';
 
 
+import { toast } from 'react-hot-toast';
+
 // The main authenticated layout containing sidebar and dashboard
 function DashboardLayout() {
   const [currentDataset, setCurrentDataset] = useState(null);
@@ -34,19 +36,21 @@ function DashboardLayout() {
         body: JSON.stringify({ prompt, datasetId: currentDataset._id })
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Query failed');
+        throw new Error(data.message || 'Query failed');
       }
 
-      const data = await response.json();
       setQueries([data, ...queries]);
     } catch (err) {
-
       console.error("Query failed", err);
+      toast.error(err.message || 'Failed to process query');
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">

@@ -14,10 +14,14 @@ exports.parseQuery = async (prompt, columns) => {
   }
 
   let lastError = null;
+  const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
   
   for (const apiKey of apiKeys) {
-    try {
-      const model = getAIModel(apiKey);
+    for (const modelName of modelsToTry) {
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: modelName });
+
 
       const systemPrompt = `
 
@@ -56,18 +60,25 @@ exports.parseQuery = async (prompt, columns) => {
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error("Could not parse AI response as JSON");
       
-      return JSON.parse(jsonMatch[0]);
-    } catch (err) {
-      lastError = err;
-      // If it's an API key error, continue to next key
-      if (err.message?.includes('API_KEY_INVALID') || err.status === 400 || err.status === 401) {
-        console.warn(`API Key ${apiKey.substring(0, 8)}... failed, trying next...`);
-        continue;
+        return JSON.parse(jsonMatch[0]);
+      } catch (err) {
+        lastError = err;
+        // If it's a model not found error (404), try the next model
+        if (err.status === 404 || err.message?.includes('not found')) {
+          console.warn(`Model ${modelName} not found for key ${apiKey.substring(0, 8)}..., trying next model...`);
+          continue;
+        }
+        // If it's an API key error (400/401), break model loop to try next key
+        if (err.status === 400 || err.status === 401 || err.message?.includes('API_KEY_INVALID')) {
+          console.warn(`API Key ${apiKey.substring(0, 8)}... failed, trying next key...`);
+          break;
+        }
+        // If it's another type of error (like JSON parsing), throw or handle
+        throw err;
       }
-      // If it's another type of error, throw it immediately
-      throw err;
     }
   }
+
 
   console.error("All AI Service keys failed:", lastError);
   throw new Error("All provided Gemini API keys are invalid or failed. Please check your .env file.");
