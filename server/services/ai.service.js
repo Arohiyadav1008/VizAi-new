@@ -3,7 +3,8 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 exports.parseQuery = async (prompt, columns) => {
   const apiKeys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(k => k);
   // Based on diagnostic listing, these are the confirmed available models for these keys
-  const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-pro"];
+  const modelsToTry = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-pro"];
+
 
   if (apiKeys.length === 0) {
     throw new Error("No Gemini API keys found in .env");
@@ -75,7 +76,8 @@ exports.parseQuery = async (prompt, columns) => {
 
 exports.generateSuggestions = async (columns) => {
   const apiKeys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(k => k);
-  const modelsToTry = ["gemini-2.5-flash", "gemini-2.0-flash"];
+  const modelsToTry = ["gemini-1.5-flash", "gemini-pro", "gemini-1.5-pro"];
+
 
   for (const apiKey of apiKeys) {
     const genAI = new GoogleGenerativeAI(apiKey);
