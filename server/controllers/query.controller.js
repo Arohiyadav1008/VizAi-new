@@ -11,8 +11,16 @@ exports.processQuery = async (req, res, next) => {
       return res.status(404).json({ message: 'Dataset not found' });
     }
 
-    // 1. AI Parsing
-    const parsed = await aiService.parseQuery(prompt, dataset.columns);
+    // 1. AI Parsing with Data Samples for better categorical mapping
+    const columnSamples = {};
+    dataset.columns.forEach(col => {
+      // Get up to 5 unique non-empty values as samples
+      const samples = [...new Set(dataset.data.map(row => row[col]).filter(v => v !== null && v !== ''))].slice(0, 5);
+      columnSamples[col] = samples;
+    });
+
+    const parsed = await aiService.parseQuery(prompt, dataset.columns, columnSamples);
+
 
     // 2. Data Processing
     let chartData = [];

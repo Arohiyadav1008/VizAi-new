@@ -1,13 +1,10 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-exports.parseQuery = async (prompt, columns) => {
+exports.parseQuery = async (prompt, columns, columnSamples = {}) => {
   const apiKeys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(k => k);
   // Based on diagnostic listing, these are the confirmed available models for these keys
   const modelsToTry = ["gemini-2.0-flash", "gemini-flash-latest", "gemini-pro-latest", "gemini-2.5-flash", "gemini-1.5-flash"];
-
-
-
-
+  
   if (apiKeys.length === 0) {
     throw new Error("No Gemini API keys found in .env");
   }
@@ -22,11 +19,13 @@ exports.parseQuery = async (prompt, columns) => {
         const model = genAI.getGenerativeModel({ model: modelName });
         const systemPrompt = `
           You are an expert Data Scientist and BI Architect. Your task is to convert a user's natural language question into a structured JSON query object for a business dashboard.
-          The data has the following columns:
-          ${JSON.stringify(columns)}
+          
+          COLUMNS AND SAMPLES:
+          ${JSON.stringify(columnSamples, null, 2)}
 
           Rules:
           1. Use ONLY the columns provided.
+
           2. Detect if the user wants an aggregation (sum, count, average, min, max).
           3. Recommend the best chart type: "bar", "line", "area", "pie", or "scatter".
           4. If the user asks for a total/overall count (no breakdown), leave "dimensions" as an empty array [].
@@ -44,7 +43,9 @@ exports.parseQuery = async (prompt, columns) => {
           }
           6. IMPORTANT: For "How many", "Count of", "Summarize", or "Total" questions, use intent: "aggregation".
           7. Avoid using numeric ID columns or indices (e.g. "User ID", "ID", "Unnamed: 0") as dimensions unless strictly necessary.
-          8. If the user asks for a comparison of counts (e.g. "number of males vs females"), use intent: "aggregation", dimension: ["Gender"], and metric: "count" operation.
+          8. If the user mentions categories (e.g. "male", "female", "married"), search the column names for related terms (e.g. "Gender", "Marital Status") and use them as dimensions.
+          9. If the user asks for a comparison of counts (e.g. "number of males vs females"), use intent: "aggregation", dimension: ["Gender"] (or relevant column), and metric: "count" operation.
+
 
         `;
 
