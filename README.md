@@ -75,3 +75,6 @@ VizAI is a modern, intelligent business intelligence platform that allows anyone
 - `client/`: React frontend source code.
 - `server/`: Express backend and AI integration logic.
 - `sample_sales_data.csv`: A sample dataset to get you started.
+
+
+##Awanish Verma

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import { MessageSquare, History, Upload, Plus, Send, FileText, ChevronRight, LogOut } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
@@ -6,6 +7,13 @@ import { useAuth } from '../context/AuthContext';
 const Sidebar = ({ currentDataset, onDatasetSelect, onUploadClick, queries, onQuerySubmit, loading }) => {
   const [query, setQuery] = useState('');
   const { user, logout } = useAuth();
+=======
+import { MessageSquare, History, Upload, Plus, Send, FileText, ChevronRight } from 'lucide-react';
+import { cn } from '../lib/utils';
+
+const Sidebar = ({ currentDataset, onDatasetSelect, onUploadClick, queries, onQuerySubmit, loading }) => {
+  const [query, setQuery] = useState('');
+>>>>>>> 405b5e56ca9d5592da3a749a72cb37743d414aaa
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -119,6 +127,7 @@ const Sidebar = ({ currentDataset, onDatasetSelect, onUploadClick, queries, onQu
       </div>
 
       <div className="p-4 border-t border-border mt-auto">
+<<<<<<< HEAD
         <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors group">
           <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold uppercase">
             {user?.name?.[0] || 'U'}
@@ -134,6 +143,17 @@ const Sidebar = ({ currentDataset, onDatasetSelect, onUploadClick, queries, onQu
           >
             <LogOut className="w-4 h-4" />
           </button>
+=======
+        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer group">
+          <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-bold">
+            U
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">User Account</p>
+            <p className="text-xs text-muted-foreground">Admin Access</p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-transform group-hover:translate-x-0.5" />
+>>>>>>> 405b5e56ca9d5592da3a749a72cb37743d414aaa
         </div>
       </div>
     </aside>
