@@ -53,12 +53,14 @@ exports.processQuery = async (req, res, next) => {
     }
 
 
-    let intent = parsed.intent;
-    if (!intent && (metrics.length > 0 || dimensions.length > 0)) {
-      intent = 'aggregation';
+    // Use existing intent or fallback to aggregation if metrics/dimensions are present
+    let finalIntent = intent;
+    if (!finalIntent && (metrics.length > 0 || dimensions.length > 0)) {
+      finalIntent = 'aggregation';
     }
 
-    if (intent === 'aggregation') {
+    if (finalIntent === 'aggregation') {
+
 
       const grouped = {};
       const actualMetrics = metrics.map(m => m.label || m.field);
