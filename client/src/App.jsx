@@ -1,28 +1,18 @@
-<<<<<<< HEAD
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
-=======
-import React, { useState, useEffect } from 'react';
->>>>>>> 405b5e56ca9d5592da3a749a72cb37743d414aaa
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import LandingPage from './components/LandingPage';
 import UploadModal from './components/UploadModal';
-<<<<<<< HEAD
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 
 // The main authenticated layout containing sidebar and dashboard
 function DashboardLayout() {
-=======
-
-function App() {
-  const [isStarted, setIsStarted] = useState(false);
->>>>>>> 405b5e56ca9d5592da3a749a72cb37743d414aaa
   const [currentDataset, setCurrentDataset] = useState(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [queries, setQueries] = useState([]);
@@ -36,11 +26,7 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-<<<<<<< HEAD
           'Authorization': `Bearer ${localStorage.getItem('token')}`
-=======
-          // 'Authorization': `Bearer ${localStorage.getItem('token')}`
->>>>>>> 405b5e56ca9d5592da3a749a72cb37743d414aaa
         },
         body: JSON.stringify({ prompt, datasetId: currentDataset._id })
       });
@@ -53,13 +39,6 @@ function App() {
     }
   };
 
-<<<<<<< HEAD
-=======
-  if (!isStarted) {
-    return <LandingPage onStart={() => setIsStarted(true)} />;
-  }
-
->>>>>>> 405b5e56ca9d5592da3a749a72cb37743d414aaa
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
       <Sidebar 
@@ -90,7 +69,6 @@ function App() {
   );
 }
 
-<<<<<<< HEAD
 function App() {
   return (
     <AuthProvider>
@@ -115,6 +93,4 @@ function App() {
   );
 }
 
-=======
->>>>>>> 405b5e56ca9d5592da3a749a72cb37743d414aaa
 export default App;

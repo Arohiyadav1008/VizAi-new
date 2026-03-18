@@ -2,17 +2,12 @@ import React from 'react';
 import { BarChart3, Zap, Database, Brain, ArrowRight, Play, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
-<<<<<<< HEAD
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const LandingPage = () => {
   const { user } = useAuth();
 
-=======
-
-const LandingPage = ({ onStart }) => {
->>>>>>> 405b5e56ca9d5592da3a749a72cb37743d414aaa
   return (
     <div className="min-h-screen bg-background selection:bg-accent selection:text-accent-foreground overflow-x-hidden">
       {/* Navbar */}
@@ -27,7 +22,6 @@ const LandingPage = ({ onStart }) => {
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Features</a>
             <a href="#solutions" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Solutions</a>
-<<<<<<< HEAD
             {user ? (
               <Link 
                 to="/dashboard"
@@ -46,14 +40,6 @@ const LandingPage = ({ onStart }) => {
                 </Link>
               </div>
             )}
-=======
-            <button 
-              onClick={onStart}
-              className="px-6 py-2.5 bg-accent text-accent-foreground rounded-full text-sm font-semibold hover:bg-accent/90 transition-all shadow-xl shadow-accent/20"
-            >
-              Start Analyzing
-            </button>
->>>>>>> 405b5e56ca9d5592da3a749a72cb37743d414aaa
           </div>
         </div>
       </nav>
@@ -104,21 +90,12 @@ const LandingPage = ({ onStart }) => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
           >
-<<<<<<< HEAD
             <Link 
               to={user ? "/dashboard" : "/signup"}
               className="w-full sm:w-auto px-10 py-4 bg-accent text-accent-foreground rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-accent/90 transition-all hover:scale-[1.03] active:scale-[0.98] shadow-2xl shadow-accent/30"
             >
               {user ? "Go to Dashboard" : "Start for Free"} <ArrowRight className="w-5 h-5" />
             </Link>
-=======
-            <button 
-              onClick={onStart}
-              className="w-full sm:w-auto px-10 py-4 bg-accent text-accent-foreground rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-accent/90 transition-all hover:scale-[1.03] active:scale-[0.98] shadow-2xl shadow-accent/30"
-            >
-              Start for Free <ArrowRight className="w-5 h-5" />
-            </button>
->>>>>>> 405b5e56ca9d5592da3a749a72cb37743d414aaa
             <button className="w-full sm:w-auto px-10 py-4 bg-white/5 border border-white/10 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-white/10 transition-all">
               <Play className="w-5 h-5 fill-current" /> Watch Demo
             </button>
@@ -164,11 +141,7 @@ const LandingPage = ({ onStart }) => {
 
       {/* Footer */}
       <footer className="py-12 border-t border-white/5">
-<<<<<<< HEAD
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center justify-between gap-8 md:flex-row">
-=======
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:row items-center justify-between gap-8 md:flex-row">
->>>>>>> 405b5e56ca9d5592da3a749a72cb37743d414aaa
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
               <BarChart3 className="text-white w-5 h-5" />
