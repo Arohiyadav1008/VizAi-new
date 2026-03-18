@@ -32,6 +32,7 @@ exports.parseQuery = async (prompt, columns) => {
           4. If the user asks for a total/overall count (no breakdown), leave "dimensions" as an empty array [].
           5. Output MUST be valid JSON:
           {
+            "intent": "aggregation" | "list", // "aggregation" for totals, counts, averages; "list" for showing individual records
             "filters": [{ "field": "Monthly Visits", "op": ">", "value": 20 }],
             "metrics": [
               { "field": "column_name", "op": "sum" | "avg" | "count" | "min" | "max", "label": "Friendly Name" }
@@ -41,8 +42,10 @@ exports.parseQuery = async (prompt, columns) => {
             "title": "A descriptive title for the chart",
             "insight": "Analytical insight."
           }
-          6. IMPORTANT: Avoid using numeric ID columns or indices (e.g. "User ID", "ID", "Unnamed: 0") as dimensions unless strictly necessary.
-          7. If the user asks for a comparison of counts (e.g. "number of males vs females"), the dimension should be the category ("Gender") and the metric should be a "count" operation.
+          6. IMPORTANT: For "How many", "Count of", "Summarize", or "Total" questions, use intent: "aggregation".
+          7. Avoid using numeric ID columns or indices (e.g. "User ID", "ID", "Unnamed: 0") as dimensions unless strictly necessary.
+          8. If the user asks for a comparison of counts (e.g. "number of males vs females"), use intent: "aggregation", dimension: ["Gender"], and metric: "count" operation.
+
         `;
 
 
